@@ -1,4 +1,4 @@
-txt
+pip==22.3
 beautifulsoup4==4.12.2
 chardet==4.0.0
 datasets==2.16.1
