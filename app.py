@@ -13,7 +13,7 @@ def display_uploaded_file(uploaded_file):
 
 # Streamlitのフォームからデータを送信して処理結果を取得する関数
 def get_processed_data(uploaded_file, query_text):
-    url = "http://0.0.0.0:10000/uploadfile/"
+    url = "https://patents-similarity-app.onrender.com/uploadfile/"
     files = {"file": uploaded_file.getvalue()}
     data = {"query_text": query_text}
     response = requests.post(url, files=files, data=data)
