@@ -17,7 +17,8 @@ def get_processed_data(uploaded_file, query_text):
     files = {"file": uploaded_file.getvalue()}
     data = {"query_text": query_text}
     response = requests.post(url, files=files, data=data)
-    return pd.read_json(response.json(), orient='records')
+    # return pd.read_json(response.json(), orient='records')
+    return pd.DataFrame(response.json())
 
 # Streamlit UI
 st.title("Patents Similarity App")
@@ -52,8 +53,11 @@ if st.button("Run Processing"):
         with st.spinner('Processing...'):
             display_uploaded_file(uploaded_file)
             df = get_processed_data(uploaded_file, query_text)
-        st.success('Done! Similarities are listed in the last column of the table below.')
-        st.subheader("Results:")
-        st.dataframe(df)  # 処理結果を表示
+            if df.empty:
+                st.error("No data received from the server.")
+            else:
+                st.success('Done! Similarities are listed in the last column of the table below.')
+                st.subheader("Results:")
+                st.dataframe(df)  # 処理結果を表示
     else:
         st.error('Please upload a CSV file and enter the text.')
