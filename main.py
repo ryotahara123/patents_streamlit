@@ -22,11 +22,6 @@ def detect_encoding(contents):
     detector.close()
     return detector.result['encoding']
 
-# トップページ
-@app.get('/')
-async def index():
-    return {"Patents": 'Patents_Similarity_App'}
-
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...), query_text: Optional[str] = Form(None)):
     try:
