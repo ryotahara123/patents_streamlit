@@ -22,13 +22,18 @@ def get_processed_data(uploaded_file, query_text):
     # return pd.read_json(response.json(), orient='records')
     json_data = response.json()
 
+    # サーバーレスポンスの確認
+    st.write("サーバーからのレスポンス:", json_data)
+
     # json_dataが辞書の場合、明示的にインデックスを提供する
     if isinstance(json_data, dict):
         # インデックスとして[0]を使用して、辞書をDataFrameの1行として扱う
         df = pd.DataFrame([json_data])
+        st.write("DataFrameに変換されるデータ:", df)
     else:
         # json_dataがリストの場合は、通常通りDataFrameを作成する
         df = pd.DataFrame(json_data)
+        st.write("DataFrameに変換されるデータ:", df)
     
     return df
 
