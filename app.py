@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import requests
+import base64
+from io import BytesIO
 
 # Display uploaded file
 def display_uploaded_file(uploaded_file):
@@ -18,7 +20,19 @@ def get_processed_data(uploaded_file, query_text):
     data = {"query_text": query_text}
     response = requests.post(url, files=files, data=data)
     # return pd.read_json(response.json(), orient='records')
-    return pd.DataFrame(response.json())
+    
+    json_data = response.json()
+
+    # JSONデータが辞書のリストである場合
+    if isinstance(json_data, list):
+        return pd.DataFrame(json_data)
+
+    # JSONデータが単一の辞書である場合（単一の行を表す）
+    elif isinstance(json_data, dict):
+        return pd.DataFrame([json_data])
+
+    else:
+        raise ValueError("Unsupported data format")
 
 # Streamlit UI
 st.title("Patents Similarity App")
@@ -59,5 +73,15 @@ if st.button("Run Processing"):
                 st.success('Done! Similarities are listed in the last column of the table below.')
                 st.subheader("Results:")
                 st.dataframe(df)  # 処理結果を表示
+
+                # CSVダウンロードリンクを生成する関数
+                def get_table_download_link(df):
+                    csv = df.to_csv(index=False)  # CSV文字列としてデータフレームを変換
+                    b64 = base64.b64encode(csv.encode()).decode()  # バイナリにエンコードし、その後base64エンコードされた文字列にデコード
+                    href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download CSV file</a>'
+                    return href
+
+                # ダウンロードリンクを表示
+                    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
     else:
         st.error('Please upload a CSV file and enter the text.')
