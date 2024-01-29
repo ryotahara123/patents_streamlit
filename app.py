@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
+import json
 import base64
 from io import BytesIO
 
@@ -19,23 +20,7 @@ def get_processed_data(uploaded_file, query_text):
     files = {"file": uploaded_file.getvalue()}
     data = {"query_text": query_text}
     response = requests.post(url, files=files, data=data)
-    # return pd.read_json(response.json(), orient='records')
-    json_data = response.json()
-
-    # サーバーレスポンスの確認
-    st.write("サーバーからのレスポンス:", json_data)
-
-    # json_dataが辞書の場合、明示的にインデックスを提供する
-    if isinstance(json_data, dict):
-        # インデックスとして[0]を使用して、辞書をDataFrameの1行として扱う
-        df = pd.DataFrame([json_data])
-        st.write("DataFrameに変換されるデータ:", df)
-    else:
-        # json_dataがリストの場合は、通常通りDataFrameを作成する
-        df = pd.DataFrame(json_data)
-        st.write("DataFrameに変換されるデータ:", df)
-    
-    return df
+    return pd.read_json(response.json(), orient='records')
 
 # Streamlit UI
 st.title("Patents Similarity App")
@@ -70,21 +55,18 @@ if st.button("Run Processing"):
         with st.spinner('Processing...'):
             display_uploaded_file(uploaded_file)
             df = get_processed_data(uploaded_file, query_text)
-            if df.empty:
-                st.error("No data received from the server.")
-            else:
-                st.success('Done! Similarities are listed in the last column of the table below.')
-                st.subheader("Results:")
-                st.dataframe(df)  # 処理結果を表示
+        st.success('Done! Similarities are listed in the last column of the table below.')
+        st.subheader("Results:")
+        st.dataframe(df)  # 処理結果を表示
 
-                # CSVダウンロードリンクを生成する関数
-                def get_table_download_link(df):
-                    csv = df.to_csv(index=False)  # CSV文字列としてデータフレームを変換
-                    b64 = base64.b64encode(csv.encode()).decode()  # バイナリにエンコードし、その後base64エンコードされた文字列にデコード
-                    href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download CSV file</a>'
-                    return href
+        # CSVダウンロードリンクを生成する関数
+        def get_table_download_link(df):
+            csv = df.to_csv(index=False)  # CSV文字列としてデータフレームを変換
+            b64 = base64.b64encode(csv.encode()).decode()  # バイナリにエンコードし、その後base64エンコードされた文字列にデコード
+            href = f'<a href="data:file/csv;base64,{b64}" download="processed_data.csv">Download CSV file</a>'
+            return href
 
-                # ダウンロードリンクを表示
-                    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+        # ダウンロードリンクを表示
+        st.markdown(get_table_download_link(df), unsafe_allow_html=True)
     else:
         st.error('Please upload a CSV file and enter the text.')
