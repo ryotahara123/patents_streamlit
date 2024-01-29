@@ -20,19 +20,17 @@ def get_processed_data(uploaded_file, query_text):
     data = {"query_text": query_text}
     response = requests.post(url, files=files, data=data)
     # return pd.read_json(response.json(), orient='records')
-    
     json_data = response.json()
 
-    # JSONデータが辞書のリストである場合
-    if isinstance(json_data, list):
-        return pd.DataFrame(json_data)
-
-    # JSONデータが単一の辞書である場合（単一の行を表す）
-    elif isinstance(json_data, dict):
-        return pd.DataFrame([json_data])
-
+    # json_dataが辞書の場合、明示的にインデックスを提供する
+    if isinstance(json_data, dict):
+        # インデックスとして[0]を使用して、辞書をDataFrameの1行として扱う
+        df = pd.DataFrame([json_data])
     else:
-        raise ValueError("Unsupported data format")
+        # json_dataがリストの場合は、通常通りDataFrameを作成する
+        df = pd.DataFrame(json_data)
+    
+    return df
 
 # Streamlit UI
 st.title("Patents Similarity App")
