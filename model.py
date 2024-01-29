@@ -1,5 +1,3 @@
-# model.py
-
 def process_data(df, query_text):
 
     import requests
