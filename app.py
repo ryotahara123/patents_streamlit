@@ -20,7 +20,10 @@ def get_processed_data(uploaded_file, query_text):
     files = {"file": uploaded_file.getvalue()}
     data = {"query_text": query_text}
     response = requests.post(url, files=files, data=data)
-    return pd.read_json(response.json(), orient='records')
+    # return pd.read_json(response.json(), orient='records')
+    response_data = response.json()
+    json_str = json.dumps(response_data)
+    return pd.read_json(json_str, orient='records')
 
 # Streamlit UI
 st.title("Patents Similarity App")
